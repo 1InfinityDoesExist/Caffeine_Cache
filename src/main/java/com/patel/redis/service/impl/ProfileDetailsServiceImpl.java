@@ -1,6 +1,5 @@
 package com.patel.redis.service.impl;
 
-import java.awt.color.ProfileDataException;
 import java.util.List;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,10 +7,13 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patel.redis.entity.ProfileDetails;
 import com.patel.redis.exception.ProfileDetailsNotFoundException;
 import com.patel.redis.model.request.ProfileDetailsCreateRquest;
+import com.patel.redis.model.request.ProfileDetailsUpdateRequest;
 import com.patel.redis.model.response.ProfileDetailsCreateResponse;
 import com.patel.redis.repository.ProfileDetailsRepository;
 import com.patel.redis.service.ProfileDetailsService;
@@ -40,13 +42,14 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         profileDetails.setEmail(pdRequest.getEmail());
         profileDetails.setFirstName(pdRequest.getFirstName());
         profileDetails.setLastName(pdRequest.getLastName());
-        profileDetails.setMoible(pdRequest.getMobile());
+        profileDetails.setMobile(pdRequest.getMobile());
         profileDetails.getPassword().add(encoder.encode(pdRequest.getPassword()));
         profileDetails.setProfileDP(pdRequest.getProfileDP());
         profileDetails.setProfilePicture(pdRequest.getProfilePicture());
         profileDetails.setUserName(pdRequest.getUserName());
         profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
         profileDetails.setHobbies(pdRequest.getHobbies());
+        profileDetails.setParentTenant(1);
         profileDetailsRepository.save(profileDetails);
         ProfileDetailsCreateResponse response = new ProfileDetailsCreateResponse();
         response.setId(profileDetails.getId());
@@ -73,12 +76,12 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
     }
 
     @Override
-    public void deleteProfileDetails(String email, Integer tenant) {
+    public void deleteProfileDetails(String email, Integer tenant) throws Exception {
         ProfileDetails profileDetailsFromDB =
                         profileDetailsRepository.getProfileDetailsByEmailAndParentTenant(email,
                                         new Integer(1));
         if (profileDetailsFromDB == null) {
-            throw new ProfileDataException(
+            throw new ProfileDetailsNotFoundException(
                             "ProfileDetails for the given email :" + email + " not found");
         }
         profileDetailsRepository.delete(profileDetailsFromDB);
@@ -87,22 +90,42 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void updateProfileDetails(String updateRequest, Integer id)
+    public void updateProfileDetails(ProfileDetailsUpdateRequest updateRequest, Integer id)
                     throws ParseException, Exception {
         ProfileDetails profileDetailsFromDB = profileDetailsRepository.getProfileDetailsById(id);
         if (profileDetailsFromDB == null) {
             throw new ProfileDetailsNotFoundException("ProfileDetails not found.");
         }
-        JSONObject payloadRequest = (JSONObject) new JSONParser().parse(updateRequest);
+        JSONObject payloadRequest = (JSONObject) new JSONParser()
+                        .parse(new ObjectMapper().writeValueAsString(updateRequest));
         JSONObject dbJsonObject = (JSONObject) new JSONParser()
                         .parse(new ObjectMapper().writeValueAsString(profileDetailsFromDB));
         for (Object obj : payloadRequest.keySet()) {
             String param = (String) obj;
+            log.info(":::::param {}", param);
             dbJsonObject.put(param, payloadRequest.get(param));
         }
-        profileDetailsRepository.save(new ObjectMapper().readValue(dbJsonObject.toJSONString(),
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        log.info("::::::{}",
+                        dbJsonObject.toJSONString());
+        profileDetailsRepository.save(objectMapper.readValue(dbJsonObject.toJSONString(),
                         ProfileDetails.class));
         return;
     }
+
+    @Override
+    public void check() throws JsonProcessingException, ParseException {
+        ProfileDetails profileDetailsFromDB = profileDetailsRepository.getProfileDetailsById(1);
+        JSONObject dbJsonObject = (JSONObject) new JSONParser()
+                        .parse(new ObjectMapper().writeValueAsString(profileDetailsFromDB));
+        log.info("::::::dbJsonObject {}", dbJsonObject);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        profileDetailsRepository.save(objectMapper.readValue(dbJsonObject.toJSONString(),
+                        ProfileDetails.class));
+
+    }
+
 
 }
