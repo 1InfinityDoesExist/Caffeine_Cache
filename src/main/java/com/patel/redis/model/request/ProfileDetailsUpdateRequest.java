@@ -6,18 +6,12 @@ import java.util.Map;
 import org.json.simple.JSONObject;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.patel.redis.model.Address;
-import lombok.Getter;
-import lombok.Setter;
 
-@Setter
-@Getter
+@lombok.Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProfileDetailsCreateRquest {
-    private String userName;
+public class ProfileDetailsUpdateRequest {
     private String email;
     private String mobile;
-    private boolean isEmailVerified;
-    private boolean isMobielVerified;
     private String firstName;
     private String lastName;
     private Date dob;

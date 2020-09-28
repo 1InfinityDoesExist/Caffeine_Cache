@@ -1,6 +1,7 @@
 package com.patel.redis.controller;
 
 import java.util.List;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.patel.redis.entity.ProfileDetails;
 import com.patel.redis.exception.ProfileDetailsNotFoundException;
 import com.patel.redis.model.request.ProfileDetailsCreateRquest;
+import com.patel.redis.model.request.ProfileDetailsUpdateRequest;
 import com.patel.redis.model.response.ProfileDetailsCreateResponse;
 import com.patel.redis.service.ProfileDetailsService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -71,7 +75,7 @@ public class ProfileDetailsController {
             List<ProfileDetails> listOfProfileDetails =
                             profileDetailsService.getAllProfileDetails(id);
             return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ModelMap().addAttribute("", listOfProfileDetails));
+                            .body(new ModelMap().addAttribute("response", listOfProfileDetails));
         } catch (final Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
@@ -93,8 +97,8 @@ public class ProfileDetailsController {
     }
 
     @PutMapping(path = "/update", consumes = "application/json")
-    public ResponseEntity<?> updateProfileDetails(@RequestBody String payload, Integer id)
-                    throws Exception {
+    public ResponseEntity<?> updateProfileDetails(@RequestBody ProfileDetailsUpdateRequest payload,
+                    @RequestParam(value = "id", required = true) Integer id) throws Exception {
         try {
             profileDetailsService.updateProfileDetails(payload, id);
             return ResponseEntity.status(HttpStatus.OK)
@@ -103,5 +107,12 @@ public class ProfileDetailsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
         }
+    }
+
+    @GetMapping(path = "/check")
+    public ResponseEntity<?> check() throws JsonProcessingException, ParseException {
+
+        profileDetailsService.check();
+        return ResponseEntity.ok(new ModelMap().addAttribute("msg", "Success"));
     }
 }

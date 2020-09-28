@@ -3,12 +3,10 @@ package com.patel.redis.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +18,7 @@ import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.json.simple.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -37,7 +36,8 @@ import lombok.Setter;
 @ApiModel(value = "ProfileDetails", description = "Profile Details Attributes")
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
             @TypeDef(name = "array-list", typeClass = ListArrayType.class)})
-public class ProfileDetails implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProfileDetails implements Serializable{
     /**
      * 
      */
@@ -59,7 +59,7 @@ public class ProfileDetails implements Serializable {
     private LocalDateTime modificationDate;
     private String userName;
     private String email;
-    private String moible;
+    private String mobile;
     private boolean isEmailVerified;
     private boolean isMobielVerified;
     private String firstName;
