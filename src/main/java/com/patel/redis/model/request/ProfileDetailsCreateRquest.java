@@ -19,7 +19,7 @@ public class ProfileDetailsCreateRquest {
     private String firstName;
     private String lastName;
     private Date dob;
-    private Stack<String> password = new Stack<>();
+    private String password;
     private String profilePicture;
     private String profileDP;
     private Address address;
