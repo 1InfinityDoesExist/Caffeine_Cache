@@ -2,11 +2,11 @@ package com.patel.redis.service.impl;
 
 import java.awt.color.ProfileDataException;
 import java.util.List;
-import java.util.Stack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patel.redis.entity.ProfileDetails;
@@ -15,16 +15,22 @@ import com.patel.redis.model.request.ProfileDetailsCreateRquest;
 import com.patel.redis.model.response.ProfileDetailsCreateResponse;
 import com.patel.redis.repository.ProfileDetailsRepository;
 import com.patel.redis.service.ProfileDetailsService;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class ProfileDetailsServiceImpl implements ProfileDetailsService {
 
     @Autowired
     private ProfileDetailsRepository profileDetailsRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
     @Override
     public ProfileDetailsCreateResponse createProfileDetails(
                     ProfileDetailsCreateRquest pdRequest, String tenant) {
+        log.info("::::::ProfileDetailsServiceImpl Class, createProfileDetails method:::::");
         // tenant check to be implemented
         ProfileDetails profileDetails = new ProfileDetails();
         profileDetails.setAddress(pdRequest.getAddress());
@@ -34,13 +40,13 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         profileDetails.setEmail(pdRequest.getEmail());
         profileDetails.setFirstName(pdRequest.getFirstName());
         profileDetails.setLastName(pdRequest.getLastName());
-        profileDetails.setMoible(pdRequest.getMoible());
-        Stack<String> password = new Stack<String>();
-        password.add(pdRequest.getPassword());
-        profileDetails.setPassword(password);
+        profileDetails.setMoible(pdRequest.getMobile());
+        profileDetails.getPassword().add(encoder.encode(pdRequest.getPassword()));
         profileDetails.setProfileDP(pdRequest.getProfileDP());
         profileDetails.setProfilePicture(pdRequest.getProfilePicture());
         profileDetails.setUserName(pdRequest.getUserName());
+        profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
+        profileDetails.setHobbies(pdRequest.getHobbies());
         profileDetailsRepository.save(profileDetails);
         ProfileDetailsCreateResponse response = new ProfileDetailsCreateResponse();
         response.setId(profileDetails.getId());

@@ -4,23 +4,28 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import org.apache.tomcat.jni.Address;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.json.simple.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.patel.redis.model.Address;
+import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.swagger.annotations.ApiModel;
 import lombok.Getter;
@@ -30,7 +35,8 @@ import lombok.Setter;
 @Setter
 @Entity(name = "ProfileDetails")
 @ApiModel(value = "ProfileDetails", description = "Profile Details Attributes")
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
+            @TypeDef(name = "array-list", typeClass = ListArrayType.class)})
 public class ProfileDetails implements Serializable {
     /**
      * 
@@ -59,7 +65,10 @@ public class ProfileDetails implements Serializable {
     private String firstName;
     private String lastName;
     private Date dob;
-    private Stack<String> password = new Stack<>();
+    // @ElementCollection(targetClass = String.class)
+    @Type(type = "array-list")
+    @Column(name = "password", columnDefinition = "text[]")
+    private List<String> password = new LinkedList<>();
     private String profilePicture;
     private String profileDP;
     private Integer parentTenant;
@@ -68,8 +77,14 @@ public class ProfileDetails implements Serializable {
     private Address address;
     @Type(type = "jsonb")
     @Column(name = "education", columnDefinition = "jsonb")
-    private String education;
+    private JSONObject education;
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    private Map<String, Object> certification = new HashMap<String, Object>();
+    private Map<String, Object> certification;
+    @Type(type = "array-list")
+    @Column(name = "lucky_number", columnDefinition = "integer[]")
+    private List<Integer> luckyNumber = new LinkedList<>();
+    @Type(type = "array-list")
+    @Column(name = "hobbies", columnDefinition = "text[]")
+    private List<String> hobbies = new LinkedList<>();
 }
