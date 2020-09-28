@@ -23,13 +23,15 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.swagger.annotations.ApiModel;
+import lombok.Getter;
+import lombok.Setter;
 
-@lombok.Data
+@Getter
+@Setter
 @Entity(name = "ProfileDetails")
 @ApiModel(value = "ProfileDetails", description = "Profile Details Attributes")
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class ProfileDetails implements Serializable {
-
     /**
      * 
      */
