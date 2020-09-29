@@ -1,6 +1,7 @@
 package com.patel.redis.service.impl;
 
 import java.util.List;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.patel.redis.entity.ProfileDetails;
 import com.patel.redis.exception.ProfileDetailsNotFoundException;
 import com.patel.redis.model.request.ProfileDetailsCreateRquest;
@@ -47,8 +49,8 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         profileDetails.setProfileDP(pdRequest.getProfileDP());
         profileDetails.setProfilePicture(pdRequest.getProfilePicture());
         profileDetails.setUserName(pdRequest.getUserName());
-        profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
-        profileDetails.setHobbies(pdRequest.getHobbies());
+        // profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
+        // profileDetails.setHobbies(pdRequest.getHobbies());
         profileDetails.setParentTenant(1);
         profileDetailsRepository.save(profileDetails);
         ProfileDetailsCreateResponse response = new ProfileDetailsCreateResponse();
@@ -97,20 +99,25 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
             throw new ProfileDetailsNotFoundException("ProfileDetails not found.");
         }
         JSONObject payloadRequest = (JSONObject) new JSONParser()
-                        .parse(new ObjectMapper().writeValueAsString(updateRequest));
+                        .parse(new Gson().toJson(updateRequest));
         JSONObject dbJsonObject = (JSONObject) new JSONParser()
-                        .parse(new ObjectMapper().writeValueAsString(profileDetailsFromDB));
+                        .parse(new Gson().toJson(profileDetailsFromDB));
         for (Object obj : payloadRequest.keySet()) {
             String param = (String) obj;
             log.info(":::::param {}", param);
-            dbJsonObject.put(param, payloadRequest.get(param));
+            if (param.equals("hobbies") || param.equals("luckyNumber")
+                            || param.equals("password")) {
+                JSONArray jsonArray = (JSONArray) payloadRequest.get(param);
+                dbJsonObject.put(param, jsonArray);
+            } else {
+                dbJsonObject.put(param, payloadRequest.get(param));
+            }
         }
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        log.info("::::::{}",
-                        dbJsonObject.toJSONString());
-        profileDetailsRepository.save(objectMapper.readValue(dbJsonObject.toJSONString(),
-                        ProfileDetails.class));
+        log.info("::::::{}", dbJsonObject.toJSONString());
+        ProfileDetails finalData = new Gson().fromJson(dbJsonObject.toJSONString(),
+                        ProfileDetails.class);
+        log.info(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::{}::", finalData);
+        profileDetailsRepository.save(finalData);
         return;
     }
 
