@@ -1,8 +1,10 @@
 # Redis_Cache
 Redis-Cache Supported Spring boot Application
+<pre>
+How to add local jar files to a Maven project?
 
-How to add local repo jar.
 First run the below command.
+<code>
 <pre>
 mvn install:install-file -Dfile=/home/gaian/Videos/fbAccessTokenVeification/demo/target/demo-0.0.1-SNAPSHOT.jar -DgroupId=com.fb -DartifactId=demo -Dversion=2.3.3.RELEASE -Dpackaging=jar -DgeneratePom=true
 <code>
