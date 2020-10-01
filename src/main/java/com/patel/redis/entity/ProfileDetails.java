@@ -7,10 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -29,15 +32,17 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 @Entity(name = "ProfileDetails")
 @ApiModel(value = "ProfileDetails", description = "Profile Details Attributes")
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
             @TypeDef(name = "array-list", typeClass = ListArrayType.class)})
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProfileDetails implements Serializable{
+public class ProfileDetails implements Serializable {
     /**
      * 
      */
@@ -64,10 +69,11 @@ public class ProfileDetails implements Serializable{
     private boolean isMobielVerified;
     private String firstName;
     private String lastName;
+    @Temporal(TemporalType.DATE)
     private Date dob;
-    // @ElementCollection(targetClass = String.class)
-    @Type(type = "array-list")
-    @Column(name = "password", columnDefinition = "text[]")
+    @ElementCollection(targetClass = String.class)
+    // @Type(type = "array-list")
+    // @Column(name = "password", columnDefinition = "text[]")
     private List<String> password = new LinkedList<>();
     private String profilePicture;
     private String profileDP;
@@ -81,10 +87,12 @@ public class ProfileDetails implements Serializable{
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> certification;
-    @Type(type = "array-list")
-    @Column(name = "lucky_number", columnDefinition = "integer[]")
+    // @Type(type = "array-list")
+    // @Column(name = "lucky_number", columnDefinition = "integer[]")
+    @ElementCollection(targetClass = Integer.class)
     private List<Integer> luckyNumber = new LinkedList<>();
-    @Type(type = "array-list")
-    @Column(name = "hobbies", columnDefinition = "text[]")
+    // @Type(type = "array-list")
+    // @Column(name = "hobbies", columnDefinition = "text[]")
+    @ElementCollection(targetClass = String.class)
     private List<String> hobbies = new LinkedList<>();
 }
