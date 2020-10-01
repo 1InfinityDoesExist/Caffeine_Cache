@@ -18,5 +18,12 @@ https://github.com/1InfinityDoesExist/Google_Facebook_Intgeration
 	&lt;artifactId&gt;demo&lt;/artifactId&gt;
 	&lt;version&gt;2.3.3.RELEASE&lt;/version&gt;
 &lt;/dependency&gt;
+
+
+
+
+Issue : Consider defining a bean of type ' ** ** ** ** ' in your configuration.
+the project has been broken down into different modules
+Just add @ComponentScan({"com.fb.demo"}) in main application class along with @SpringBootApplication
 <code>
 
