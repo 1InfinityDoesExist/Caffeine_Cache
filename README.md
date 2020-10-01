@@ -7,10 +7,11 @@ mvn install:install-file -Dfile=/home/gaian/Videos/fbAccessTokenVeification/demo
 
 
 Now  add the dependncy in the pom.file 
+<pre>
 &lt;dependency&gt;
 	&lt;groupId&gt;com.fb&lt;/groupId&gt;
 	&lt;artifactId&gt;demo&lt;/artifactId&gt;
 	&lt;version&gt;2.3.3.RELEASE&lt;/version&gt;
 &lt;/dependency&gt;
-
+<code>
 
