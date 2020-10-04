@@ -20,6 +20,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.json.simple.JSONObject;
+import org.springframework.cache.annotation.CacheConfig;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -34,6 +35,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
+@CacheConfig(cacheNames = {"profileDetails"})
 @Getter
 @Setter
 @ToString

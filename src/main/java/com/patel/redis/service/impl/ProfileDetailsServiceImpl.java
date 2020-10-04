@@ -1,19 +1,22 @@
 package com.patel.redis.service.impl;
 
 import java.util.List;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.StringUtils;
+import com.fb.demo.entity.Tenant;
+import com.fb.demo.exception.TenantNotFoundException;
+import com.fb.demo.repository.TenantRepository;
 import com.google.gson.Gson;
 import com.patel.redis.entity.ProfileDetails;
+import com.patel.redis.exception.InvalidInputException;
 import com.patel.redis.exception.ProfileDetailsNotFoundException;
+import com.patel.redis.exception.UserNameAlreadyInUseException;
 import com.patel.redis.model.request.ProfileDetailsCreateRquest;
 import com.patel.redis.model.request.ProfileDetailsUpdateRequest;
 import com.patel.redis.model.response.ProfileDetailsCreateResponse;
@@ -31,10 +34,26 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
+    @Autowired(required = true)
+    private TenantRepository tenantRepository;
+
     @Override
     public ProfileDetailsCreateResponse createProfileDetails(
-                    ProfileDetailsCreateRquest pdRequest, String tenant) {
+                    ProfileDetailsCreateRquest pdRequest, String tenant) throws Exception {
         log.info("::::::ProfileDetailsServiceImpl Class, createProfileDetails method:::::");
+        Tenant tenantFromDB = tenantRepository.getTenantByName(tenant);
+        if (tenantFromDB == null) {
+            throw new TenantNotFoundException("Tenant not found");
+        }
+        if (pdRequest.getUserName() == null || StringUtils.isEmpty(pdRequest.getUserName())) {
+            throw new InvalidInputException("Username must not be null or empty");
+        }
+        ProfileDetails profileDetailsFromDB = profileDetailsRepository
+                        .getProfileDetailsByUserNameAndParentTenant(pdRequest.getUserName(),
+                                        new Integer(1));
+        if (profileDetailsFromDB != null) {
+            throw new UserNameAlreadyInUseException("Username already user");
+        }
         // tenant check to be implemented
         ProfileDetails profileDetails = new ProfileDetails();
         profileDetails.setAddress(pdRequest.getAddress());
@@ -49,8 +68,8 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         profileDetails.setProfileDP(pdRequest.getProfileDP());
         profileDetails.setProfilePicture(pdRequest.getProfilePicture());
         profileDetails.setUserName(pdRequest.getUserName());
-        // profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
-        // profileDetails.setHobbies(pdRequest.getHobbies());
+        profileDetails.setLuckyNumber(pdRequest.getLuckyNumber());
+        profileDetails.setHobbies(pdRequest.getHobbies());
         profileDetails.setParentTenant(1);
         profileDetailsRepository.save(profileDetails);
         ProfileDetailsCreateResponse response = new ProfileDetailsCreateResponse();
@@ -59,19 +78,25 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         return response;
     }
 
+    @Cacheable(value = "profileDetails", key = "#id", unless = "#result.id <100")
     @Override
-    public ProfileDetails getProfileDetailsByUserName(String userName) throws Exception {
+    public ProfileDetails getProfileDetailsByUserName(Integer id) throws Exception {
+        log.info("::::::GetProfileDetails By Id");
         ProfileDetails profileDetailsFromDB =
-                        profileDetailsRepository.getProfileDetailsByUserName(userName);
+                        profileDetailsRepository.getProfileDetailsById(id);
         if (profileDetailsFromDB == null) {
             throw new ProfileDetailsNotFoundException(
-                            "ProfileDetails for the given userName :" + userName + " not found");
+                            "ProfileDetails for the given userName :" + id + " not found");
         }
         return profileDetailsFromDB;
     }
 
     @Override
-    public List<ProfileDetails> getAllProfileDetails(Integer parentTenant) {
+    public List<ProfileDetails> getAllProfileDetails(Integer parentTenant) throws Exception {
+        Tenant tenantFromDB = tenantRepository.getTenantById(parentTenant);
+        if (tenantFromDB == null) {
+            throw new TenantNotFoundException("Tenant not found");
+        }
         List<ProfileDetails> listOfProfileDetails =
                         profileDetailsRepository.getProfileDetailsByParentTenant(parentTenant);
         return listOfProfileDetails;
@@ -79,6 +104,10 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
 
     @Override
     public void deleteProfileDetails(String email, Integer tenant) throws Exception {
+        Tenant tenantFromDB = tenantRepository.getTenantById(tenant);
+        if (tenantFromDB == null) {
+            throw new TenantNotFoundException("Tenant not found");
+        }
         ProfileDetails profileDetailsFromDB =
                         profileDetailsRepository.getProfileDetailsByEmailAndParentTenant(email,
                                         new Integer(1));
@@ -105,13 +134,7 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         for (Object obj : payloadRequest.keySet()) {
             String param = (String) obj;
             log.info(":::::param {}", param);
-            if (param.equals("hobbies") || param.equals("luckyNumber")
-                            || param.equals("password")) {
-                JSONArray jsonArray = (JSONArray) payloadRequest.get(param);
-                dbJsonObject.put(param, jsonArray);
-            } else {
-                dbJsonObject.put(param, payloadRequest.get(param));
-            }
+            dbJsonObject.put(param, payloadRequest.get(param));
         }
         log.info("::::::{}", dbJsonObject.toJSONString());
         ProfileDetails finalData = new Gson().fromJson(dbJsonObject.toJSONString(),
@@ -120,19 +143,4 @@ public class ProfileDetailsServiceImpl implements ProfileDetailsService {
         profileDetailsRepository.save(finalData);
         return;
     }
-
-    @Override
-    public void check() throws JsonProcessingException, ParseException {
-        ProfileDetails profileDetailsFromDB = profileDetailsRepository.getProfileDetailsById(1);
-        JSONObject dbJsonObject = (JSONObject) new JSONParser()
-                        .parse(new ObjectMapper().writeValueAsString(profileDetailsFromDB));
-        log.info("::::::dbJsonObject {}", dbJsonObject);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        profileDetailsRepository.save(objectMapper.readValue(dbJsonObject.toJSONString(),
-                        ProfileDetails.class));
-
-    }
-
-
 }
