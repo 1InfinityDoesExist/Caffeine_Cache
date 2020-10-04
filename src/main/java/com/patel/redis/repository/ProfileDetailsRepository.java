@@ -16,4 +16,7 @@ public interface ProfileDetailsRepository extends JpaRepository<ProfileDetails, 
 
     public ProfileDetails getProfileDetailsByEmailAndParentTenant(String email, Integer i);
 
+    public ProfileDetails getProfileDetailsByUserNameAndParentTenant(String userName,
+                    Integer integer);
+
 }

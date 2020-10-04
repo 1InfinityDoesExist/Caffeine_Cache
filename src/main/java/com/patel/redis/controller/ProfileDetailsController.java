@@ -1,8 +1,8 @@
 package com.patel.redis.controller;
 
 import java.util.List;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fb.demo.exception.TenantNotFoundException;
 import com.patel.redis.entity.ProfileDetails;
 import com.patel.redis.exception.ProfileDetailsNotFoundException;
 import com.patel.redis.model.request.ProfileDetailsCreateRquest;
@@ -24,9 +24,11 @@ import com.patel.redis.model.response.ProfileDetailsCreateResponse;
 import com.patel.redis.service.ProfileDetailsService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController("v1ProfileDetails")
 @RequestMapping(path = "/v1/profileDetails")
+@Slf4j
 public class ProfileDetailsController {
 
     @Autowired
@@ -38,6 +40,7 @@ public class ProfileDetailsController {
     public ResponseEntity<?> createProfileDetails(@RequestBody ProfileDetailsCreateRquest request,
                     @PathVariable(name = "tenantName", required = true) String tenantName)
                     throws Exception {
+        log.info(":::::Inside ProfileDetailsController Class, createProfileDetais method:::::");
         try {
             ProfileDetailsCreateResponse response =
                             profileDetailsService.createProfileDetails(request, tenantName);
@@ -45,20 +48,20 @@ public class ProfileDetailsController {
                             .body(new ModelMap().addAttribute("id", response.getId()).addAttribute(
                                             "msg",
                                             response.getMsg()));
-        } catch (Exception ex) {
+        } catch (final TenantNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
         }
     }
 
-    @GetMapping(path = "/{userName}", produces = "application/json")
-    @ApiImplicitParams({@ApiImplicitParam(name = "userName", paramType = "path")})
+    @GetMapping(path = "/{id}", produces = "application/json")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", paramType = "path")})
     public ResponseEntity<?> getProfileDetails(
-                    @PathVariable(name = "userName", required = true) String userName)
+                    @PathVariable(name = "id", required = true) Integer id)
                     throws Exception {
         try {
             ProfileDetails profileDetails =
-                            profileDetailsService.getProfileDetailsByUserName(userName);
+                            profileDetailsService.getProfileDetailsByUserName(id);
             return ResponseEntity.status(HttpStatus.OK)
                             .body(new ModelMap().addAttribute("response", profileDetails));
         } catch (final ProfileDetailsNotFoundException ex) {
@@ -67,16 +70,17 @@ public class ProfileDetailsController {
         }
     }
 
+
     @GetMapping(path = "/{id}/get")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", paramType = "path")})
     public ResponseEntity<?> getAllProfileDetails(
-                    @PathVariable(name = "id", required = true) Integer id) {
+                    @PathVariable(name = "id", required = true) Integer id) throws Exception {
         try {
             List<ProfileDetails> listOfProfileDetails =
                             profileDetailsService.getAllProfileDetails(id);
             return ResponseEntity.status(HttpStatus.OK)
                             .body(new ModelMap().addAttribute("response", listOfProfileDetails));
-        } catch (final Exception ex) {
+        } catch (final TenantNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
         }
@@ -93,6 +97,9 @@ public class ProfileDetailsController {
         } catch (final ProfileDetailsNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
+        } catch (final TenantNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new ModelMap().addAttribute("msg", ex.getMessage()));
         }
     }
 
@@ -107,12 +114,5 @@ public class ProfileDetailsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new ModelMap().addAttribute("msg", ex.getMessage()));
         }
-    }
-
-    @GetMapping(path = "/check")
-    public ResponseEntity<?> check() throws JsonProcessingException, ParseException {
-
-        profileDetailsService.check();
-        return ResponseEntity.ok(new ModelMap().addAttribute("msg", "Success"));
     }
 }

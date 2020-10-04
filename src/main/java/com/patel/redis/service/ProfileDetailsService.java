@@ -17,7 +17,7 @@ public interface ProfileDetailsService {
                     ProfileDetailsCreateRquest profileDetailsCreateRequest, String tenant)
                     throws Exception;
 
-    public ProfileDetails getProfileDetailsByUserName(String userName) throws Exception;
+    public ProfileDetails getProfileDetailsByUserName(Integer id) throws Exception;
 
     public List<ProfileDetails> getAllProfileDetails(Integer parentTenant) throws Exception;
 
@@ -25,6 +25,4 @@ public interface ProfileDetailsService {
 
     public void updateProfileDetails(ProfileDetailsUpdateRequest updateRequest, Integer id)
                     throws Exception;
-
-    public void check() throws JsonProcessingException, ParseException;
 }
