@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
@@ -29,6 +30,14 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 	private int maxActiveConn;
 	@Value("${spring.redis.jedis.pool.max-idle:8}")
 	private int maxIdle;
+
+	
+	
+	@Override
+	public CacheManager cacheManager() {
+		// TODO Auto-generated method stub
+		return super.cacheManager();
+	}
 
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate() {

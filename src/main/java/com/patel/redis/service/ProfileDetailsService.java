@@ -13,16 +13,14 @@ import com.patel.redis.model.response.ProfileDetailsCreateResponse;
 @Service
 public interface ProfileDetailsService {
 
-    public ProfileDetailsCreateResponse createProfileDetails(
-                    ProfileDetailsCreateRquest profileDetailsCreateRequest, String tenant)
-                    throws Exception;
+	public ProfileDetailsCreateResponse createProfileDetails(ProfileDetailsCreateRquest profileDetailsCreateRequest,
+			String tenant) throws Exception;
 
-    public ProfileDetails getProfileDetailsByUserName(Integer id) throws Exception;
+	public ProfileDetails getProfileDetailsByUserName(Integer id) throws Exception;
 
-    public List<ProfileDetails> getAllProfileDetails(Integer parentTenant) throws Exception;
+	public List<ProfileDetails> getAllProfileDetails(Integer parentTenant) throws Exception;
 
-    public void deleteProfileDetails(String email, Integer parentTenant) throws Exception;
+	public void deleteProfileDetails(Integer email, Integer parentTenant) throws Exception;
 
-    public void updateProfileDetails(ProfileDetailsUpdateRequest updateRequest, Integer id)
-                    throws Exception;
+	public void updateProfileDetails(ProfileDetailsUpdateRequest updateRequest, Integer id) throws Exception;
 }
