@@ -1,13 +1,13 @@
-package com.patel.redis;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class RedisApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}
+//PACKAGE COM.PATEL.REDIS;
+//
+//IMPORT ORG.JUNIT.JUPITER.API.TEST;
+//IMPORT ORG.SPRINGFRAMEWORK.BOOT.TEST.CONTEXT.SPRINGBOOTTEST;
+//
+//@SPRINGBOOTTEST
+//CLASS REDISAPPLICATIONTESTS {
+//
+//	@TEST
+//	VOID CONTEXTLOADS() {
+//	}
+//
+//}
