@@ -8,15 +8,16 @@ import com.patel.redis.entity.ProfileDetails;
 @Repository
 public interface ProfileDetailsRepository extends JpaRepository<ProfileDetails, Integer> {
 
-    public ProfileDetails getProfileDetailsByUserName(String userName);
+	public ProfileDetails getProfileDetailsByUserName(String userName);
 
-    public ProfileDetails getProfileDetailsById(Integer id);
+	public ProfileDetails getProfileDetailsById(Integer id);
 
-    public List<ProfileDetails> getProfileDetailsByParentTenant(Integer tenant);
+	public List<ProfileDetails> getProfileDetailsByParentTenant(Integer tenant);
 
-    public ProfileDetails getProfileDetailsByEmailAndParentTenant(String email, Integer i);
+	public ProfileDetails getProfileDetailsByEmailAndParentTenant(String email, Integer i);
 
-    public ProfileDetails getProfileDetailsByUserNameAndParentTenant(String userName,
-                    Integer integer);
+	public ProfileDetails getProfileDetailsByUserNameAndParentTenant(String userName, Integer integer);
+
+	public ProfileDetails getProfileDetailsByIdAndParentTenant(Integer id, Integer integer);
 
 }

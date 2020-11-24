@@ -74,11 +74,11 @@ public class ProfileDetailsController {
 		}
 	}
 
-	@DeleteMapping(value = "/{email}/{id}")
-	public ResponseEntity<?> deleteProfileDetails(@PathVariable(name = "email", required = true) String email,
-			@PathVariable(name = "id", required = true) Integer id) throws Exception {
+	@DeleteMapping(value = "/{id}/{tenantId}")
+	public ResponseEntity<?> deleteProfileDetails(@PathVariable(name = "id", required = true) Integer id,
+			@PathVariable(name = "tenantId", required = true) Integer tenantId) throws Exception {
 		try {
-			profileDetailsService.deleteProfileDetails(email, id);
+			profileDetailsService.deleteProfileDetails(id, tenantId);
 			return ResponseEntity.status(HttpStatus.OK)
 					.body(new ModelMap().addAttribute("msg", "Successfully deleted."));
 		} catch (final ProfileDetailsNotFoundException ex) {
